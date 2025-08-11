@@ -15,18 +15,50 @@ export const login = async (username, password) => {
   return data;
 };
 
-export const submitQuery = async (question) => {
-  const res = await fetch(`${API_URL}/query`, {
+export const connectDatabase = async (name, dbUrl) => {
+  const res = await fetch(`${API_URL}/connect-db`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${getToken()}`
     },
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({ name, dbUrl }),
   });
   const data = await res.json();
   if (!res.ok) {
-    throw new Error(data.error || 'Query failed.');
+    throw new Error(data.message || 'Failed to connect database.');
+  }
+  return data;
+};
+
+export const runSandboxQuery = async (question, dbId) => {
+  const res = await fetch(`${API_URL}/query/sandbox`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getToken()}`
+    },
+    body: JSON.stringify({ question, dbId }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || 'Sandbox query failed.');
+  }
+  return data;
+};
+
+export const syncQuery = async (sqlQuery, dbId) => {
+  const res = await fetch(`${API_URL}/query/sync`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getToken()}`
+    },
+    body: JSON.stringify({ sqlQuery, dbId }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.message || 'Sync failed.');
   }
   return data;
 };

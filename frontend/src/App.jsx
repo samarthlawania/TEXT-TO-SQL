@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import LoginForm from './components/LoginForm';
+import DBListScreen from './components/DBListScreen';
 import QueryInterface from './components/QueryInterface';
-import HistoryList from './components/HistoryList'; // The missing import
+import HistoryList from './components/HistoryList';
 import { getQueryHistory } from './api';
 
 function App() {
@@ -9,6 +10,7 @@ function App() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [currentView, setCurrentView] = useState('dbList'); // 'dbList', 'query', 'history', 'userManagement'
 
   useEffect(() => {
     if (localStorage.getItem('token')) {
@@ -37,25 +39,40 @@ function App() {
     localStorage.removeItem('token');
     setIsAuthenticated(false);
     setHistory([]);
+    setCurrentView('dbList');
   };
 
   if (!isAuthenticated) {
     return <LoginForm onLoginSuccess={handleLoginSuccess} />;
   }
 
+  const renderView = () => {
+    switch (currentView) {
+      case 'dbList':
+        return <DBListScreen onSelectDb={() => setCurrentView('query')} />;
+      case 'query':
+        return <QueryInterface onQuerySuccess={fetchHistory} />;
+      case 'history':
+        return <HistoryList history={history} />;
+      // case 'userManagement':
+      //   return <UserManagement />;
+      default:
+        return <DBListScreen onSelectDb={() => setCurrentView('query')} />;
+    }
+  };
+
   return (
     <div className="App" style={{ fontFamily: 'sans-serif', maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>SQL Explorer</h1>
-        <button onClick={handleLogout}>Logout</button>
+        <nav>
+          <button onClick={() => setCurrentView('dbList')}>Databases</button>
+          <button onClick={() => setCurrentView('history')}>History</button>
+          <button onClick={handleLogout}>Logout</button>
+        </nav>
       </header>
       <hr />
-      <QueryInterface onQuerySuccess={fetchHistory} />
-      <hr />
-      <h2>Query History</h2>
-      {loading && <p>Loading history...</p>}
-      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-      <HistoryList history={history} />
+      {renderView()}
     </div>
   );
 }
