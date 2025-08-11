@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { login } from '../api';
+import { register} from '../api';
 
-const LoginForm = ({ onLoginSuccess, onSwitchToRegister }) => {
-  const [email, setEmail] = useState('');
+const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
+  const [username, setUsername] = useState('');
+  const [email,setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -12,9 +13,9 @@ const LoginForm = ({ onLoginSuccess, onSwitchToRegister }) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await login(email, password); // Assuming 'login' takes email
+      const data = await register(username, email,password);
       localStorage.setItem('token', data.token);
-      onLoginSuccess();
+      onRegisterSuccess();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -24,8 +25,19 @@ const LoginForm = ({ onLoginSuccess, onSwitchToRegister }) => {
 
   return (
     <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
-      <h2 style={{ textAlign: 'center' }}>Login</h2>
+      <h2 style={{ textAlign: 'center' }}>Register</h2>
       <form onSubmit={handleSubmit}>
+         <div style={{ marginBottom: '15px' }}>
+          <label htmlFor="username" style={{ display: 'block', marginBottom: '5px' }}>Username:</label>
+          <input
+            type="text"
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+          />
+        </div>
         <div style={{ marginBottom: '15px' }}>
           <label htmlFor="email" style={{ display: 'block', marginBottom: '5px' }}>Email:</label>
           <input
@@ -54,11 +66,12 @@ const LoginForm = ({ onLoginSuccess, onSwitchToRegister }) => {
           disabled={loading}
           style={{ width: '100%', padding: '10px', backgroundColor: '#007BFF', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
         >
-          {loading ? 'Logging in...' : 'Login'}
+          {loading ? 'Registering...' : 'Register'}
         </button>
-         <div style={{ textAlign: 'center', marginTop: '10px' }}>
+      </form>
+      <div style={{ textAlign: 'center', marginTop: '10px' }}>
         <button
-          onClick={onSwitchToRegister}
+          onClick={onSwitchToLogin}
           style={{
             textDecoration: 'none',
             color: '#007BFF',
@@ -69,12 +82,11 @@ const LoginForm = ({ onLoginSuccess, onSwitchToRegister }) => {
             marginTop: '10px'
           }}
         >
-           Don't have an account, sign up/register
+          Already have an account? Login
         </button>
-        </div>
-      </form>
+      </div>
     </div>
   );
 };
 
-export default LoginForm;
+export default Register;

@@ -1,83 +1,130 @@
-const { Sequelize, DataTypes } = require('sequelize');
-const config = require('./config');
+// db.js
+import { Sequelize, DataTypes } from 'sequelize';
 
-const sequelize = new Sequelize(config.databaseUrl, {
-  dialect: 'postgres',
-  logging: false, // Set to true to see SQL queries
-});
+// =======================
+// Database Connection (Supabase)
+// =======================
+const sequelize = new Sequelize(
+  'postgres',                // Database name
+  'postgres',                // Database username
+  'Vnfj.8Qx.!2485+',         // Database password (replace this)
+  {
+    host: 'db.gqsnhlixyawsonabtbck.supabase.co',
+    port: 5432,
+    dialect: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false, // Required for Supabase SSL
+      }
+    },
+    logging: false, // Set to true if you want SQL logs
+  }
+);
 
-const Query = sequelize.define('Query', {
-  id: {
+// =======================
+// Models
+// =======================
+const User = sequelize.define('User', {
+  user_id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
-    primaryKey: true
+    primaryKey: true,
   },
-  userId: {
+  username: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+  // These are the missing fields
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+  password_hash: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+}, {
+  tableName: 'Users',
+  timestamps: true,
+});
+
+const Roles = sequelize.define('Roles', {
+  role_id: {
     type: DataTypes.UUID,
-    allowNull: false
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
   },
-  naturalLanguageQuery: {
-    type: DataTypes.TEXT,
-    allowNull: false
+  role_name: {
+    type: DataTypes.STRING,
+    allowNull: false,
   },
-  sqlQuery: {
-    type: DataTypes.TEXT,
-    allowNull: false
-  },
-  result: {
-    type: DataTypes.JSONB
-  },
-  createdAt: {
-    type: DataTypes.DATE,
-    defaultValue: Sequelize.NOW
+  assigned_to_user_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    references: {
+      model: 'Users',
+      key: 'user_id',
+    },
+    onDelete: 'CASCADE',
   }
+}, {
+  tableName: 'Roles',
+  timestamps: true,
 });
 
-const User = sequelize.define('User', {
-    id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        primaryKey: true
+const Databases = sequelize.define('Databases', {
+  database_id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  database_name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  created_by_user_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    references: {
+      model: 'Users',
+      key: 'user_id',
     },
-    username: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
-    },
-    password: {
-        type: DataTypes.STRING,
-        allowNull: false
-    }
+    onDelete: 'CASCADE',
+  }
+}, {
+  tableName: 'Databases',
+  timestamps: true,
 });
 
-// Define a simple database schema for the LLM to query
-const schemaDefinition = `
-  -- Table: Customers
-  -- Columns: customer_id (INT, PK), name (VARCHAR), email (VARCHAR), country (VARCHAR), signup_date (DATE)
-  -- Example:
-  -- customer_id | name            | email                 | country | signup_date
-  -- 1           | Alice Johnson   | alice@example.com     | USA     | 2023-01-15
-  -- 2           | Bob Smith       | bob@example.com       | Canada  | 2023-02-20
+// =======================
+// Associations
+// =======================
+User.hasMany(Roles, { foreignKey: 'assigned_to_user_id' });
+Roles.belongsTo(User, { foreignKey: 'assigned_to_user_id' });
 
-  -- Table: Orders
-  -- Columns: order_id (INT, PK), customer_id (INT, FK), order_date (DATE), total_amount (DECIMAL)
-  -- Example:
-  -- order_id | customer_id | order_date | total_amount
-  -- 101      | 1           | 2023-03-05 | 150.75
-  -- 102      | 2           | 2023-03-10 | 25.50
-`;
+User.hasMany(Databases, { foreignKey: 'created_by_user_id' });
+Databases.belongsTo(User, { foreignKey: 'created_by_user_id' });
 
-const getDbSchema = () => schemaDefinition;
+// =======================
+// Sync Function
+// =======================
+async function connectAndSync() {
+  try {
+    await sequelize.authenticate();
+    console.log('✅ Connected to Supabase Postgres');
 
-const connectAndSync = async () => {
-    try {
-        await sequelize.authenticate();
-        console.log('Database connection has been established successfully.');
-        await sequelize.sync({ alter: true });
-        console.log('Database synchronized.');
-    } catch (error) {
-        console.error('Unable to connect to the database:', error);
-    }
-};
+    // Sync in order
+  await sequelize.sync({ force: true }); // Drops all tables and recreates
 
-module.exports = { sequelize, User, Query, getDbSchema, connectAndSync };
+
+    console.log('✅ All models synced');
+  } catch (error) {
+    console.error('❌ Error syncing database:', error);
+  }
+}
+
+// Export
+export { sequelize, User, Roles, Databases, connectAndSync };
