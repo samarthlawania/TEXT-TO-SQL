@@ -74,9 +74,19 @@ console.log('Login attempt with password:', password);
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        // Password matches, handle successful login
-        // ... create and send a token, etc.
-        res.status(200).json({ message: 'Login successful' });
+        // 4. Generate a JWT token
+        const token = generateToken(user.user_id);  
+        console.log('Login successful for user:', email);
+        // 5. Return the user data and token (excluding the password hash)
+        res.status(200).json({
+            message: 'Login successful',
+            user: {
+                user_id: user.user_id,
+                username: user.username,
+                email: user.email,
+            },
+            token: token
+        });
 
     } catch (error) {
         console.error('Login error:', error);
