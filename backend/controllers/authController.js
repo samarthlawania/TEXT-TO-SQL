@@ -53,12 +53,13 @@ exports.registerUser = async (req, res) => {
     }
 };
 exports.loginUser = async (req, res) => {
-    const { username,email, password } = req.body;
+    const { email, password } = req.body;
 console.log('Login attempt with email:', email);
 console.log('Login attempt with password:', password);
     try {
         // 1. Find the user by email
         const user = await User.findOne({ where: { email } });
+        console.log('User found:', user);
 
         // 2. IMPORTANT: Check if the user exists before proceeding
         if (!user) {

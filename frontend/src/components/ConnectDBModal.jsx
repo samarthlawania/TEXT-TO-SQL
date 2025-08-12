@@ -1,18 +1,23 @@
 import React, { useState } from 'react';
 import { connectDatabase } from '../api';
+import { useSelector } from "react-redux";
+
 
 const ConnectDBModal = ({ onClose, onDbConnected }) => {
     const [dbName, setDbName] = useState('');
     const [dbUrl, setDbUrl] = useState('');
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const user = useSelector((state) => state.user);
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
         try {
-            const data = await connectDatabase(dbName, dbUrl);
+            console.log("User",user)
+            const data = await connectDatabase(dbName, dbUrl,user);
             onDbConnected({ name: dbName, id: data.db_id });
         } catch (err) {
             setError(err.message);

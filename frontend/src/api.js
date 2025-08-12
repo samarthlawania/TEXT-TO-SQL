@@ -28,14 +28,15 @@ export const register = async (username,email, password) => {
   return data;
 };
 
-export const connectDatabase = async (name, dbUrl) => {
+export const connectDatabase = async (name, dbUrl,user) => {
+  console.log('Connecting to database:', name, dbUrl, user);
   const res = await fetch(`${API_URL}/connect-db`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${getToken()}`
     },
-    body: JSON.stringify({ name, dbUrl }),
+    body: JSON.stringify({ name, dbUrl ,user}),
   });
   const data = await res.json();
   if (!res.ok) {

@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { login } from '../api';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUser, clearUser } from '../../store';
+
 
 const LoginForm = ({ onLoginSuccess, onSwitchToRegister }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,6 +19,7 @@ const LoginForm = ({ onLoginSuccess, onSwitchToRegister }) => {
     try {
       const data = await login(email, password); // Assuming 'login' takes email
       localStorage.setItem('token', data.token);
+      dispatch(setUser({ username: data?.user?.username, email: data?.user?.email, userId: data?.user?.user_id })); // Assuming 'data' contains user info
       onLoginSuccess();
     } catch (err) {
       setError(err.message);

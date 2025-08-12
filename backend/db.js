@@ -85,6 +85,10 @@ const Databases = sequelize.define('Databases', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  db_url: {
+      type: DataTypes.STRING,
+      allowNull: false, 
+  },
   created_by_user_id: {
     type: DataTypes.UUID,
     allowNull: false,
@@ -117,7 +121,7 @@ async function connectAndSync() {
     console.log('✅ Connected to Supabase Postgres');
 
     // Sync in order
-  await sequelize.sync({ force: true }); // Drops all tables and recreates
+//  await sequelize.sync({ force: true }); // Drops all tables and recreates
 
 
     console.log('✅ All models synced');

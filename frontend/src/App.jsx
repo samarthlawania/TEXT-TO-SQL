@@ -5,7 +5,8 @@ import QueryInterface from './components/QueryInterface';
 import HistoryList from './components/HistoryList';
 import { getQueryHistory } from './api';
 import Register from './components/Register';
-// Assuming UserManagement exists
+import { useDispatch, useSelector } from 'react-redux';
+import { setUser, clearUser } from '../store';// Assuming UserManagement exists
 // import UserManagement from './components/UserManagement';
 
 function App() {
@@ -13,6 +14,8 @@ function App() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
   const [currentView, setCurrentView] = useState('dbList');
   const [showRegister, setShowRegister] = useState(false);
 
@@ -21,7 +24,7 @@ function App() {
     const token = localStorage.getItem('token');
     if (token) {
       setIsAuthenticated(true);
-      fetchHistory();
+     fetchHistory();
     }
   }, []); // Empty dependency array means this runs only on mount
 
@@ -51,10 +54,10 @@ function App() {
   };
   const handleLogout = () => {
     localStorage.removeItem('token');
+    dispatch(clearUser())
     setIsAuthenticated(false);
     setHistory([]);
-    setCurrentView('dbList');
-  };
+    };
 
   if (!isAuthenticated) {
     return (
