@@ -77,6 +77,18 @@ export const syncQuery = async (sqlQuery, dbId) => {
   return data;
 };
 
+export const getDbList = async(userId)=>{
+  const res = await fetch(`${API_URL}/get-db-list`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${getToken()}` },
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || 'Failed to fetch database list.');
+  }
+  return data;
+}
+
 export const getQueryHistory = async () => {
   const res = await fetch(`${API_URL}/history`, {
     headers: { 'Authorization': `Bearer ${getToken()}` },

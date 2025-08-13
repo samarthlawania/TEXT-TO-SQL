@@ -6,8 +6,8 @@ import HistoryList from './components/HistoryList';
 import { getQueryHistory } from './api';
 import Register from './components/Register';
 import { useDispatch, useSelector } from 'react-redux';
-import { setUser, clearUser } from '../store';// Assuming UserManagement exists
-// import UserManagement from './components/UserManagement';
+import { setUser, clearUser } from '../store';
+import './App.css'; // Import the new CSS file
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -19,14 +19,13 @@ function App() {
   const [currentView, setCurrentView] = useState('dbList');
   const [showRegister, setShowRegister] = useState(false);
 
-  // Use a single useEffect for initial authentication check and data fetching
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
       setIsAuthenticated(true);
-     fetchHistory();
+      fetchHistory();
     }
-  }, []); // Empty dependency array means this runs only on mount
+  }, []);
 
   const fetchHistory = async () => {
     setLoading(true);
@@ -54,14 +53,14 @@ function App() {
   };
   const handleLogout = () => {
     localStorage.removeItem('token');
-    dispatch(clearUser())
+    dispatch(clearUser());
     setIsAuthenticated(false);
     setHistory([]);
-    };
+  };
 
   if (!isAuthenticated) {
     return (
-      <div className="App flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="app-container app-auth">
         {showRegister ? (
           <Register onRegisterSuccess={handleRegisterSuccess} onSwitchToLogin={handleSwitchToLogin} />
         ) : (
@@ -79,8 +78,7 @@ function App() {
         return <QueryInterface onQuerySuccess={fetchHistory} />;
       case 'history':
         return <HistoryList history={history} />;
-      case 'userManagement':
-      // The UserManagement component is commented out, but this is where it would be rendered
+      // case 'userManagement':
       // return <UserManagement dbId="some-db-id" />;
       default:
         return <DBListScreen onSelectDb={() => setCurrentView('query')} />;
@@ -88,17 +86,28 @@ function App() {
   };
 
   return (
-    <div className="App" style={{ fontFamily: 'sans-serif', maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1>SQL Explorer</h1>
-        <nav>
-          <button onClick={() => setCurrentView('dbList')}>Databases</button>
-          <button onClick={() => setCurrentView('history')}>History</button>
-          {/* <button onClick={() => setCurrentView('userManagement')}>Admin</button> */}
-          <button onClick={handleLogout}>Logout</button>
+    <div className="App">
+      <header className="app-header">
+        <h1 className="app-title">SQL Explorer</h1>
+        <nav className="app-nav">
+          <button
+            className={`nav-btn ${currentView === 'dbList' ? 'active' : ''}`}
+            onClick={() => setCurrentView('dbList')}
+          >
+            Databases
+          </button>
+          <button
+            className={`nav-btn ${currentView === 'history' ? 'active' : ''}`}
+            onClick={() => setCurrentView('history')}
+          >
+            History
+          </button>
+          <button className="nav-btn" onClick={handleLogout}>
+            Logout
+          </button>
         </nav>
       </header>
-      <hr />
+      <hr className="divider" />
       {renderView()}
     </div>
   );

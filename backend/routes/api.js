@@ -1,6 +1,6 @@
 const express = require('express');
 const { loginUser,registerUser } = require('../controllers/authController');
-const { connectDb } = require('../controllers/dbController');
+const { connectDb,getDbList } = require('../controllers/dbController');
 const { inviteUser, setRole } = require('../controllers/userController');
 const { executeSandboxQuery, syncQuery, getHistory } = require('../controllers/queryController');
 const { protect } = require('../middleware/auth');
@@ -10,6 +10,7 @@ const router = express.Router();
 // Auth route
 router.post('/login', loginUser);
 router.post('/connect-db', protect, connectDb);
+router.post('/get-db-list',protect, getDbList);
 router.post('/invite-user', protect, inviteUser);
 router.post('/set-role', protect, setRole);
 router.post('/query/sandbox', protect, executeSandboxQuery);
