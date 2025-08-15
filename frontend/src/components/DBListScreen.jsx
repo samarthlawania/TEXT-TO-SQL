@@ -1,17 +1,20 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import ConnectDBModal from './ConnectDBModal';
 import { useSelector } from 'react-redux';
 import { getDbList } from '../api';
 const DBListScreen = ({ onSelectDb }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [databases, setDatabases] = useState([]); 
+    const [databases, setDatabases] = useState([]);
     const user = useSelector((state) => state.user);
-    
 
-        useEffect(async()=>{
+
+    useEffect(() => {
+        const load = async () => {
             await fetchDbList();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        },[])
+        };
+        load();
+    }, []);
+
     const handleConnectClick = () => {
         setIsModalOpen(true);
     };
@@ -22,7 +25,7 @@ const DBListScreen = ({ onSelectDb }) => {
             setDatabases(res.Databases.map(db => ({
                 name: db.database_name,
                 id: db.database_id,
-                role: db.UserDatabaseRoles.role // Assuming UserDatabaseRoles is included in the response
+                role: db.UserDatabaseRoles.role 
             })));
         }
     }
